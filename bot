@@ -1,0 +1,40 @@
+import telebot, wikipedia, re
+
+bot = telebot.TeleBot("5338169763:AAE_EUcVH9-3FrAFr8vk0fU-hB7q0upYs9w")
+
+wikipedia.set_lang("ru")
+
+def getwiki(article):
+  try:
+    answer = wikipedia.page(article)
+    text = answer.content[:500]
+    mas = text.split(".") #разделить по точкам
+    mas = mas[:-1] #убрать все после последней точки
+    text2 = ""
+      
+    for string in mas:
+      if not("==" in string):
+        if (len(string.strip()) > 3): #функция строки, которая удаляет символы #если длина строки больше 3, то
+          text2 = text2 + string + "." #добавляем эту строку в текст (возвращаем потерянные точки)
+      else:
+        break
+    
+    text2 = re.sub("\([^()]*\)", "", text2) #возвращение измененной строки
+    text2 = re.sub("\([^()]*\)", "", text2)
+    text2 = re.sub("\{[^\{\}]*\}", "", text2)
+    return text2
+    
+  except Exception as exception:
+    return "Информация не найдена"
+    
+@bot.message_handler(commands = ["start"])
+def startWork(message, result = False):
+  tid = message.chat.id
+  bot.send_message(tid, "Отправьте слово")
+
+@bot.message_handler(content_types = ["text"])
+def sendMessage(message):
+  mid = message.chat.id
+  bot.send_message(mid, getwiki(message.text))
+
+bot.polling(none_stop = True, interval = 0)
